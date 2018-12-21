@@ -1,4 +1,4 @@
-@Library('github.com/rupalibehera/osio-pipeline@pod_template') _
+@Library('github.com/fabric8io/osio-pipeline@pod_template') _
 def utils = new io.openshift.Utils()
 
 osio {
@@ -6,8 +6,10 @@ osio {
   config runtime: 'java', version: '1.8'
 
   ci {
-     integrationTestCmd = "mvn verify integration-test -Dnamespace.use.current=false -Dnamespace.use.existing=${utils.usersNamespace()} -Dit.test=*IT -DfailIfNoTests=false -DenableImageStreamDetection=true -Popenshift,openshift-it"
-     runTest commands: integrationTestCmd
+     def app = processTemplate(params: [
+          RELEASE_VERSION: "1.0.${env.BUILD_NUMBER}"
+     ])
+    echo "CI Build"
   }
 
   cd {
