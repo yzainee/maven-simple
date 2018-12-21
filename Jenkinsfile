@@ -1,29 +1,25 @@
-@Library('github.com/fabric8io/osio-pipeline@master') _
+@Library('github.com/rupalibehera/osio-pipeline@pod_template') _
+def utils = new io.openshift.Utils()
 
 osio {
-
-  config runtime: 'maven'
+  
+  config runtime: 'java', version: '1.8'
 
   ci {
-    // runs oc process
-    def resources = processTemplate()
-
-    // performs an s2i build
-    build resources: resources
-
+     integrationTestCmd = "mvn verify integration-test -Dnamespace.use.current=false -Dnamespace.use.existing=${utils.usersNamespace()} -Dit.test=*IT -DfailIfNoTests=false -DenableImageStreamDetection=true -Popenshift,openshift-it"
+     runTest commands: integrationTestCmd
   }
 
   cd {
 
-    // override the RELEASE_VERSION template parameter
     def resources = processTemplate(params: [
-        RELEASE_VERSION: "1.0.${env.BUILD_NUMBER}"
+          release_version: "1.0.${env.BUILD_NUMBER}"
     ])
+    echo "CD build"
 
     build resources: resources
     deploy resources: resources, env: 'stage'
-
-    // wait for user to approve the promotion to "run" environment
     deploy resources: resources, env: 'run', approval: 'manual'
+
   }
 }
