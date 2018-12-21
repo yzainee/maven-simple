@@ -6,9 +6,10 @@ osio {
   config runtime: 'java', version: '1.8'
 
   ci {
-     def app = processTemplate(params: [
+
+    def app = processTemplate(params: [
           RELEASE_VERSION: "1.0.${env.BUILD_NUMBER}"
-     ])
+    ])
     echo "CI Build"
   }
 
